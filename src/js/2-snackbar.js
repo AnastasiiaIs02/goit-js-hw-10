@@ -1,19 +1,21 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-const formEl = document.querySelector('.form');
+const refs = {
+  form: document.querySelector('.form'),
+  input: document.querySelector('input[name ="delay"]'),
+  button: document.querySelector('button[type ="submit"]'),
+};
 
-formEl.addEventListener('submit', promiseGenerator);
-
-function promiseGenerator(e) {
+refs.form.addEventListener('submit', e => {
   e.preventDefault();
+  const delay = refs.input.value.trim();
 
-  const delay = e.target.delay.value;
-  const status = e.target.state.value;
+  const stateInput = document.querySelector('input[type = "radio"]:checked');
 
   const promise = new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (status === 'fulfilled') {
+      if (stateInput.value === 'fulfilled') {
         resolve(delay);
       } else {
         reject(delay);
@@ -21,38 +23,31 @@ function promiseGenerator(e) {
     }, delay);
   });
 
-  promise
-    .then(delay => {
-      iziToast.success({
-        message: `Fulfilled promise in ${delay}ms`,
-        messageSize: '16',
-        messageColor: '#fff',
-        backgroundColor: '#59a10d',
-        position: 'topRight',
-        close: true,
-        closeOnEscape: true,
-        closeOnClick: true,
-        progressBar: true,
-        progressBarColor: '#326101',
-        iconColor: '#fff',
-        iconUrl: resolveImageUrl,
-      });
-    })
-    .catch(delay => {
-      iziToast.error({
-        message: `Rejected promise in ${delay}ms`,
-        messageSize: '16',
-        messageColor: '#fff',
-        backgroundColor: '#ef4040',
-        position: 'topRight',
-        close: true,
-        closeOnEscape: true,
-        closeOnClick: true,
-        progressBar: true,
-        progressBarColor: '#ffbebe',
-        iconUrl: imageUrl,
-        iconColor: '#fff',
-      });
+  promise.then(onFulfilled).catch(onRejected);
+  function onFulfilled() {
+    iziToast.show({
+      title: 'OK',
+      titleColor: '#fff',
+      titleSize: '16px',
+      message: `✅ Fulfilled promise in ${delay}ms`,
+      messageColor: '#fff',
+      backgroundColor: '#59a10d',
+      iconColor: '#fff',
+      progressBarColor: '#326101',
+      position: 'topRight',
     });
-  formEl.reset();
-}
+  }
+  function onRejected() {
+    iziToast.show({
+      title: 'ERROR',
+      titleColor: '#fff',
+      titleSize: '16px',
+      message: `❌ Rejected promise in ${delay}ms`,
+      messageColor: '#fff',
+      backgroundColor: '#ef4040',
+      iconColor: '#fff',
+      progressBarColor: '#b51b1b',
+      position: 'topRight',
+    });
+  }
+});
